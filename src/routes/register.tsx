@@ -1,0 +1,2 @@
+import { createFileRoute } from "@tanstack/react-router"; import { AuthPage } from "@/features/account/AuthPage";
+export const Route=createFileRoute("/register")({head:()=>({meta:[{title:"Create Account — Playo"},{name:"description",content:"Join Playo as a player or turf owner."},{property:"og:title",content:"Create Account — Playo"},{property:"og:description",content:"Join Playo as a player or turf owner."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:()=> <AuthPage register/>});

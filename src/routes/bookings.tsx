@@ -1,0 +1,2 @@
+import { createFileRoute } from "@tanstack/react-router"; import { BookingsPage } from "@/features/account/AccountPages";
+export const Route=createFileRoute("/bookings")({head:()=>({meta:[{title:"My Bookings — Playo"},{name:"description",content:"Manage upcoming and past turf bookings."},{property:"og:title",content:"My Bookings — Playo"},{property:"og:description",content:"Manage upcoming and past turf bookings."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:BookingsPage});

@@ -1,0 +1,2 @@
+import { createFileRoute } from "@tanstack/react-router"; import { AddTurfPage } from "@/features/owner/OwnerPages";
+export const Route=createFileRoute("/owner/add-turf")({head:()=>({meta:[{title:"Add a Turf — Playo"},{name:"description",content:"Create a complete verified turf listing."},{property:"og:title",content:"Add a Turf — Playo"},{property:"og:description",content:"Create a complete verified turf listing."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:AddTurfPage});

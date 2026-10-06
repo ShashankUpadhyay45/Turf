@@ -1,0 +1,2 @@
+import { createFileRoute } from "@tanstack/react-router"; import { FavoritesPage } from "@/features/account/AccountPages";
+export const Route=createFileRoute("/favorites")({head:()=>({meta:[{title:"Favorite Turfs — Playo"},{name:"description",content:"Your saved cricket and football turfs."},{property:"og:title",content:"Favorite Turfs — Playo"},{property:"og:description",content:"Your saved cricket and football turfs."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:FavoritesPage});

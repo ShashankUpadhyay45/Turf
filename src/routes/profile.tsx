@@ -1,0 +1,2 @@
+import { createFileRoute } from "@tanstack/react-router"; import { ProfilePage } from "@/features/account/AccountPages";
+export const Route=createFileRoute("/profile")({head:()=>({meta:[{title:"Your Profile — Playo"},{name:"description",content:"Manage your Playo profile and preferences."},{property:"og:title",content:"Your Profile — Playo"},{property:"og:description",content:"Manage your Playo profile and preferences."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:ProfilePage});
