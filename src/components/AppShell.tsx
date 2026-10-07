@@ -756,7 +756,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div>
-            <p className="font-bold text-sm tracking-wide uppercase text-background/40">
+            <p className="font-bold text-sm tracking-wide uppercase text-background/75">
               Discover
             </p>
             <div className="mt-3 grid gap-2 text-sm text-background/70">
@@ -778,7 +778,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div>
-            <p className="font-bold text-sm tracking-wide uppercase text-background/40">
+            <p className="font-bold text-sm tracking-wide uppercase text-background/75">
               For Owners
             </p>
             <div className="mt-3 grid gap-2 text-sm text-background/70">
@@ -806,7 +806,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div>
-            <p className="font-bold text-sm tracking-wide uppercase text-background/40">
+            <p className="font-bold text-sm tracking-wide uppercase text-background/75">
               Account & Legal
             </p>
             <div className="mt-3 grid gap-2 text-sm text-background/70">
@@ -819,7 +819,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link to="/login" className="hover:text-background transition">
                 Sign In
               </Link>
-              <span className="text-xs text-background/40 mt-2 block">
+              <span className="text-xs text-background/70 mt-2 block">
                 © 2026 Playo Technologies Inc.
               </span>
             </div>

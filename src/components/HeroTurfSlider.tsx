@@ -60,6 +60,10 @@ export function HeroTurfSlider() {
             <img
               src={slide.image}
               alt={slide.alt}
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding="async"
+              // @ts-expect-error - fetchPriority attribute support
+              fetchpriority={index === 0 ? "high" : "low"}
               className={`size-full object-cover transition-transform duration-[4000ms] ease-out ${
                 isActive ? 'scale-105' : 'scale-100'
               }`}
@@ -87,27 +91,31 @@ export function HeroTurfSlider() {
       </button>
 
       {/* Minimal Non-Text Pagination Dots (Bottom) */}
-      <div className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-sm">
+      <div className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-sm">
         {slides.map((s, idx) => (
           <button
             key={s.id}
             type="button"
             onClick={() => setCurrent(idx)}
             aria-label={`Slide ${idx + 1}`}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              idx === current
-                ? 'w-6 bg-white shadow'
-                : 'w-2 bg-white/40 hover:bg-white/70'
-            }`}
-          />
+            className="flex h-11 min-w-[28px] items-center justify-center p-1.5 cursor-pointer"
+          >
+            <span
+              className={`block h-2 rounded-full transition-all duration-300 ${
+                idx === current
+                  ? 'w-6 bg-white shadow'
+                  : 'w-2 bg-white/40 hover:bg-white/70'
+              }`}
+            />
+          </button>
         ))}
       </div>
 
       {/* Subtle Auto-Slide Progress Bar at very bottom edge */}
-      <div className="absolute inset-x-0 bottom-0 z-30 h-1 bg-black/20">
+      <div className="absolute inset-x-0 bottom-0 z-30 h-1 bg-black/20 overflow-hidden">
         <div
           key={current}
-          className="h-full bg-emerald-400 transition-all"
+          className="h-full w-full bg-emerald-400 origin-left"
           style={{
             animation: isHovered
               ? 'none'
@@ -118,8 +126,8 @@ export function HeroTurfSlider() {
 
       <style>{`
         @keyframes progressGrow {
-          from { width: 0%; }
-          to { width: 100%; }
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
         }
       `}</style>
     </div>

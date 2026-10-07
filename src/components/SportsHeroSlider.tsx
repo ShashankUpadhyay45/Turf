@@ -197,19 +197,23 @@ export function SportsHeroSlider() {
         </button>
 
         {/* Pagination dots */}
-        <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1">
           {slides.map((s, i) => (
             <button
               key={s.id}
               onClick={() => goTo(i)}
               aria-label={`Go to ${s.sport}`}
               aria-current={i === current ? 'true' : undefined}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === current
-                  ? 'w-8 bg-white'
-                  : 'w-2 bg-white/40 hover:bg-white/60'
-              }`}
-            />
+              className="flex h-11 min-w-[32px] items-center justify-center p-2 cursor-pointer"
+            >
+              <span
+                className={`block h-2 rounded-full transition-all duration-300 ${
+                  i === current
+                    ? 'w-8 bg-white'
+                    : 'w-2 bg-white/40 hover:bg-white/60'
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>
