@@ -1,18 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
-import { ArrowRight, CheckCircle2, Gift, MapPin, Search, ShieldCheck, Sparkles, Trophy, Users } from "lucide-react";
+import { ArrowRight, CheckCircle2, Gift, MapPin, ShieldCheck, Sparkles } from "lucide-react";
 import { TurfCard } from "@/components/TurfCard";
-import { SportsHeroSlider } from "@/components/SportsHeroSlider";
 import { HeroTurfSlider } from "@/components/HeroTurfSlider";
 import { ActionLink, Badge, SectionHeading } from "@/components/ui";
 import { SearchBar } from "@/features/home/SearchBar";
 import { areas, turfs } from "@/data/turfs";
 
+const LazySportsHeroSlider = lazy(() =>
+  import("@/components/SportsHeroSlider").then((m) => ({ default: m.SportsHeroSlider }))
+);
+
 export const Route=createFileRoute("/")({head:()=>({meta:[{title:"Playo — Find Your Game. Book Your Turf."},{name:"description",content:"Discover verified cricket and football turfs near you, book instantly, and earn TurfPoints."},{property:"og:title",content:"Playo — Find Your Game. Book Your Turf."},{property:"og:description",content:"Discover verified cricket and football turfs near you, book instantly, and earn TurfPoints."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Home});
 function Home(){return <>
 <section className="relative min-h-[calc(100svh-4rem)] overflow-hidden border-b border-border bg-accent/30"><div className="container-page grid min-h-[calc(100svh-4rem)] items-center gap-6 py-10 lg:grid-cols-[.95fr_1.05fr] lg:py-12"><div className="relative z-10"><Badge tone="green"><Sparkles className="size-3"/>Dehradun's verified turf network</Badge><h1 className="mt-5 max-w-3xl font-display text-6xl font-black leading-[.88] md:text-8xl">FIND YOUR GAME.<br/><span className="text-success">BOOK YOUR TURF.</span></h1><p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">Discover nearby cricket and football turfs, check live-style availability, book instantly, and get rewarded for every game.</p><div className="mt-7 max-w-3xl"><SearchBar/></div><div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm"><span className="font-extrabold">6 turfs found</span><span className="flex items-center gap-1 text-muted-foreground"><MapPin className="size-4 text-info"/>Within 5 km</span><span className="text-muted-foreground">Sorted by nearest</span></div></div><div className="relative h-[48vh] min-h-[360px] lg:h-[72vh]"><HeroTurfSlider /></div></div></section>
 <section className="container-page py-20"><SectionHeading eyebrow="Play nearby" title="Popular near you" body="Illustrative venue photos, transparent prices, and the shortest distance first." action={<Link to="/explore" className="hidden items-center gap-2 font-bold sm:flex">See all <ArrowRight className="size-4"/></Link>}/><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{turfs.slice(0,3).map((t)=><TurfCard key={t.id} turf={t}/>)}</div></section>
-<SportsHeroSlider />
+<Suspense fallback={<div className="h-96 w-full animate-pulse bg-muted/20 rounded-2xl my-10" />}>
+  <LazySportsHeroSlider />
+</Suspense>
 <section className="container-page py-20"><SectionHeading eyebrow="No sidelines" title="Search. Choose. Book. Play."/><div className="grid gap-3 sm:grid-cols-5">{[["01","Search"],["02","Choose"],["03","Book"],["04","Play"],["05","Earn"]].map(([n,l])=><div key={n} className="border-t-2 border-primary py-5"><span className="text-xs font-extrabold text-info">{n}</span><p className="mt-2 font-display text-2xl font-extrabold">{l}</p></div>)}</div></section>
 <section className="border-y border-border bg-card py-20"><div className="container-page"><SectionHeading eyebrow="Explore by area" title="Your next ground is close."/><div className="flex flex-wrap gap-3">{areas.map((a)=><Link key={a} to="/explore" search={{q:a,sport:"All sports"}} className="rounded-full border border-border bg-background px-5 py-3 text-sm font-bold transition hover:border-primary hover:bg-secondary">{a}</Link>)}</div></div></section>
 <section className="container-page grid gap-10 py-20 lg:grid-cols-2 lg:items-center"><div><Badge tone="gold"><Gift className="size-3"/>TurfPoints</Badge><h2 className="mt-5 font-display text-5xl font-black leading-none">PLAY MORE.<br/>GET REWARDED.</h2><p className="mt-4 max-w-lg text-muted-foreground">Every completed booking moves you closer to your next discount. No confusing tiers, just points you can actually use.</p><ActionLink to="/rewards" variant="dark" className="mt-7">Explore rewards <ArrowRight className="size-4"/></ActionLink></div><div className="card-shell bg-reward-soft p-7"><div className="flex items-center justify-between"><div><p className="text-sm font-bold text-reward">Your TurfPoints</p><p className="font-display text-6xl font-black">320</p></div><div className="grid size-20 place-items-center rounded-full bg-reward text-2xl font-black text-card">TP</div></div><div className="mt-8 h-2 overflow-hidden rounded-full bg-card"><div className="h-full w-[64%] bg-reward"/></div><div className="mt-3 flex justify-between text-xs font-bold"><span>320 points</span><span>180 to ₹200 off</span></div></div></section>
