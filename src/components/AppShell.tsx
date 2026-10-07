@@ -868,7 +868,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     ? "text-info font-black"
                     : isAdmin
                       ? "text-destructive font-black"
-                      : "text-primary font-black"
+                      : "text-success font-black"
                   : "text-muted-foreground"
               }`}
             >
