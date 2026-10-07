@@ -15,9 +15,31 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', service: 'Playo Turf API', timestamp: new Date().toISOString() });
+const apiInfo = {
+  status: 'online',
+  service: 'Playo Turf Booking Backend API',
+  version: '1.0.0',
+  documentation: {
+    health: '/health',
+    turfs: '/api/v1/turfs',
+    turfById: '/api/v1/turfs/:id (e.g. /api/v1/turfs/champions-arena)',
+    slots: '/api/v1/slots?turfId=champions-arena&date=YYYY-MM-DD',
+    holdSlot: 'POST /api/v1/slots/hold',
+    bookings: 'GET /api/v1/bookings/my, POST /api/v1/bookings',
+    tournaments: '/api/v1/tournaments',
+    reviews: '/api/v1/reviews/turf/:turfId',
+    auth: 'POST /api/v1/auth/login, POST /api/v1/auth/register',
+  },
+  timestamp: new Date().toISOString(),
+};
+
+// Root & Health check endpoints
+app.get(['/', '/health'], (req, res) => {
+  res.status(200).json(apiInfo);
+});
+
+app.get(['/api', '/api/v1'], (req, res) => {
+  res.status(200).json(apiInfo);
 });
 
 // Mount routes at both /api/v1 (standard) and /api (fallback)
