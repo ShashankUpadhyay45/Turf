@@ -62,8 +62,8 @@ export function HeroTurfSlider() {
               alt={slide.alt}
               loading={index === 0 ? "eager" : "lazy"}
               decoding="async"
-              // @ts-expect-error - fetchPriority attribute support
-              fetchpriority={index === 0 ? "high" : "low"}
+              // @ts-expect-error - React fetchPriority attribute
+              fetchPriority={index === 0 ? "high" : "low"}
               className={`size-full object-cover transition-transform duration-[4000ms] ease-out ${
                 isActive ? 'scale-105' : 'scale-100'
               }`}
