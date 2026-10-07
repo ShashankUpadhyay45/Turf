@@ -1,22 +1,34 @@
 import app from './app';
+import { connectDB } from './config/database';
+import { startHoldExpirationJob } from './jobs/holdExpirationJob';
 import { logger } from './utils/logger';
 
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    // Mock DB connection
-    logger.info('Database connected (mocked)');
+    // Connect to MongoDB
+    await connectDB();
+    logger.info('Database connected successfully');
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       logger.info(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
     });
-    
-    // Start periodic hold expiration job
-    setInterval(() => {
-      // Logic to clear expired holds
-      logger.info('Running periodic hold expiration check (mocked)');
-    }, 60000);
+
+    // Start background slot hold expiration worker
+    startHoldExpirationJob();
+
+    // Graceful shutdown handling
+    const shutdown = async (signal: string) => {
+      logger.info(`Received ${signal}. Shutting down gracefully...`);
+      server.close(() => {
+        logger.info('HTTP server closed.');
+        process.exit(0);
+      });
+    };
+
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
 
   } catch (error) {
     logger.error('Error starting server', error);

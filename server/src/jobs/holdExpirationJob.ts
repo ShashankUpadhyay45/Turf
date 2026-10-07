@@ -1,5 +1,5 @@
 import winston from 'winston';
-import { Slot } from '../models/Slot.js';
+import { Slot } from '../models/Slot';
 
 const logger = winston.createLogger({
   level: 'info',

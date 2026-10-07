@@ -1,3 +1,5 @@
+import { Slot, ISlot } from '../models/Slot';
+
 export interface SlotInfo {
   id: string;
   turfId: string;
@@ -7,108 +9,198 @@ export interface SlotInfo {
   status: 'available' | 'booked' | 'held' | 'unavailable' | 'maintenance';
   bookingId?: string;
   heldUntil?: Date | null;
+  heldBy?: string | null;
 }
 
-const baseHours = [
-  '06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM',
-  '04:00 PM', '05:00 PM', '06:00 PM', '07:00 PM', '08:00 PM', '09:00 PM', '10:00 PM'
+const standardHours = [
+  { start: '06:00 AM', end: '07:00 AM' },
+  { start: '07:00 AM', end: '08:00 AM' },
+  { start: '08:00 AM', end: '09:00 AM' },
+  { start: '09:00 AM', end: '10:00 AM' },
+  { start: '10:00 AM', end: '11:00 AM' },
+  { start: '04:00 PM', end: '05:00 PM' },
+  { start: '05:00 PM', end: '06:00 PM' },
+  { start: '06:00 PM', end: '07:00 PM' },
+  { start: '07:00 PM', end: '08:00 PM' },
+  { start: '08:00 PM', end: '09:00 PM' },
+  { start: '09:00 PM', end: '10:00 PM' },
+  { start: '10:00 PM', end: '11:00 PM' },
 ];
 
-function getEndTime(start: string): string {
-  const match = start.match(/(\d{2}):(\d{2})\s*(AM|PM)/);
-  if (!match) return start;
-  let hours = parseInt(match[1]!, 10);
-  const minutes = match[2];
-  const period = match[3]!;
-  if (period === 'PM' && hours !== 12) hours += 12;
-  if (period === 'AM' && hours === 12) hours = 0;
-  hours = (hours + 1) % 24;
-  const newPeriod = hours >= 12 ? 'PM' : 'AM';
-  const displayHours = hours % 12 || 12;
-  return `${String(displayHours).padStart(2, '0')}:${minutes} ${newPeriod}`;
-}
-
-// In-memory slot state storage
-const dynamicSlotOverrides = new Map<string, string>();
-
 export const getSlots = async (turfId: string, date: string): Promise<SlotInfo[]> => {
-  // Deterministic seed based on turf + date
-  let hash = 0;
-  const keyBase = `${turfId}-${date}`;
-  for (let i = 0; i < keyBase.length; i++) {
-    hash = ((hash << 5) - hash) + keyBase.charCodeAt(i);
-    hash |= 0;
-  }
-  const absHash = Math.abs(hash);
+  const now = new Date();
 
-  return baseHours.map((startTime, idx) => {
-    const slotKey = `${turfId}-${date}-${startTime}`;
-    let status: SlotInfo['status'] = 'available';
+  // 1. Release any expired holds for this turf & date
+  await Slot.updateMany(
+    {
+      turfId,
+      date,
+      status: 'held',
+      heldUntil: { $lt: now },
+    },
+    {
+      $set: { status: 'available', heldUntil: null, heldBy: null },
+    }
+  );
 
-    if (dynamicSlotOverrides.has(slotKey)) {
-      status = dynamicSlotOverrides.get(slotKey) as any;
-    } else {
-      const slotSeed = (absHash + idx * 7) % 100;
-      if (slotSeed < 20) {
-        status = 'booked';
-      } else if (slotSeed < 26) {
-        status = 'maintenance';
-      }
+  // 2. Fetch slots from MongoDB
+  let slots = await Slot.find({ turfId, date }).sort({ startTime: 1 }).lean();
+
+  // 3. If no slots exist yet for this date, seed them dynamically
+  if (slots.length === 0) {
+    const slotsToCreate = standardHours.map((h) => ({
+      turfId,
+      date,
+      startTime: h.start,
+      endTime: h.end,
+      status: 'available',
+    }));
+
+    try {
+      await Slot.insertMany(slotsToCreate, { ordered: false });
+    } catch (e) {
+      // Ignore race conditions on duplicate keys
     }
 
-    return {
-      id: `${turfId}-${date}-${startTime.replace(/[\s:]/g, '')}`,
+    slots = await Slot.find({ turfId, date }).sort({ startTime: 1 }).lean();
+  }
+
+  return slots.map((s: any) => ({
+    id: s._id.toString(),
+    turfId: s.turfId,
+    date: s.date,
+    startTime: s.startTime,
+    endTime: s.endTime,
+    status: s.status,
+    bookingId: s.bookingId,
+    heldUntil: s.heldUntil,
+    heldBy: s.heldBy,
+  }));
+};
+
+export const holdSlot = async (
+  turfId: string,
+  date: string,
+  startTime: string,
+  userId: string,
+  holdMinutes: number = 10
+) => {
+  const now = new Date();
+  const heldUntil = new Date(now.getTime() + holdMinutes * 60 * 1000);
+
+  // Ensure slot exists in DB first
+  let existing = await Slot.findOne({ turfId, date, startTime });
+  if (!existing) {
+    const matchedHour = standardHours.find((h) => h.start === startTime);
+    const endTime = matchedHour ? matchedHour.end : startTime;
+    try {
+      await Slot.create({
+        turfId,
+        date,
+        startTime,
+        endTime,
+        status: 'available',
+      });
+    } catch (e) {
+      // Ignore if concurrent creation
+    }
+  }
+
+  // Atomic hold operation: only succeed if available OR expired hold
+  const slot = await Slot.findOneAndUpdate(
+    {
       turfId,
       date,
       startTime,
-      endTime: getEndTime(startTime),
-      status,
-      bookingId: status === 'booked' ? `TB-${turfId}-${idx}` : undefined,
-    };
-  });
-};
+      $or: [
+        { status: 'available' },
+        { status: 'held', heldUntil: { $lt: now } },
+        { status: 'held', heldBy: userId }, // same user refreshing hold
+      ],
+    },
+    {
+      $set: {
+        status: 'held',
+        heldUntil,
+        heldBy: userId,
+      },
+    },
+    { new: true }
+  );
 
-export const holdSlot = async (turfId: string, date: string, startTime: string, userId: string) => {
-  const slotKey = `${turfId}-${date}-${startTime}`;
-  dynamicSlotOverrides.set(slotKey, 'held');
+  if (!slot) {
+    const current = await Slot.findOne({ turfId, date, startTime });
+    if (current?.status === 'booked') {
+      throw new Error('This slot is already booked.');
+    }
+    throw new Error('This slot is currently held by another player. Please select another slot.');
+  }
+
   return {
-    turfId,
-    date,
-    startTime,
-    status: 'held' as const,
-    heldUntil: new Date(Date.now() + 10 * 60000),
+    id: slot._id.toString(),
+    turfId: slot.turfId,
+    date: slot.date,
+    startTime: slot.startTime,
+    endTime: slot.endTime,
+    status: slot.status,
+    heldUntil: slot.heldUntil,
+    heldBy: slot.heldBy,
   };
 };
 
-export const blockSlot = async (turfId: string, date: string, startTime: string, ownerId: string) => {
-  const slotKey = `${turfId}-${date}-${startTime}`;
-  dynamicSlotOverrides.set(slotKey, 'unavailable');
-  return { turfId, date, startTime, status: 'unavailable' as const };
+export const releaseHold = async (turfId: string, date: string, startTime: string, userId?: string) => {
+  const query: any = { turfId, date, startTime, status: 'held' };
+  if (userId && userId !== 'admin-1') {
+    query.heldBy = userId;
+  }
+
+  const slot = await Slot.findOneAndUpdate(
+    query,
+    {
+      $set: {
+        status: 'available',
+        heldUntil: null,
+        heldBy: null,
+      },
+    },
+    { new: true }
+  );
+
+  return slot;
 };
 
-export const unblockSlot = async (turfId: string, date: string, startTime: string, ownerId: string) => {
-  const slotKey = `${turfId}-${date}-${startTime}`;
-  dynamicSlotOverrides.set(slotKey, 'available');
-  return { turfId, date, startTime, status: 'available' as const };
+export const blockSlot = async (turfId: string, date: string, startTime: string) => {
+  const slot = await Slot.findOneAndUpdate(
+    { turfId, date, startTime },
+    { $set: { status: 'unavailable', heldUntil: null, heldBy: null } },
+    { upsert: true, new: true }
+  );
+  return slot;
 };
 
-export const setMaintenance = async (turfId: string, date: string, startTime: string, ownerId: string) => {
-  const slotKey = `${turfId}-${date}-${startTime}`;
-  dynamicSlotOverrides.set(slotKey, 'maintenance');
-  return { turfId, date, startTime, status: 'maintenance' as const };
+export const unblockSlot = async (turfId: string, date: string, startTime: string) => {
+  const slot = await Slot.findOneAndUpdate(
+    { turfId, date, startTime },
+    { $set: { status: 'available', heldUntil: null, heldBy: null } },
+    { new: true }
+  );
+  return slot;
 };
 
-export const clearMaintenance = async (turfId: string, date: string, startTime: string, ownerId: string) => {
-  const slotKey = `${turfId}-${date}-${startTime}`;
-  dynamicSlotOverrides.set(slotKey, 'available');
-  return { turfId, date, startTime, status: 'available' as const };
+export const setMaintenance = async (turfId: string, date: string, startTime: string) => {
+  const slot = await Slot.findOneAndUpdate(
+    { turfId, date, startTime },
+    { $set: { status: 'maintenance', heldUntil: null, heldBy: null } },
+    { upsert: true, new: true }
+  );
+  return slot;
 };
 
 export const availabilityService = {
   getSlots,
   holdSlot,
+  releaseHold,
   blockSlot,
   unblockSlot,
   setMaintenance,
-  clearMaintenance,
 };

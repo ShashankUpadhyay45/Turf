@@ -6,6 +6,9 @@ import { AuthRequest } from '../middleware/auth';
 export const getSlots = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { turfId, date } = req.query;
+    if (!turfId || !date) {
+      return res.status(400).json({ success: false, message: 'turfId and date query parameters are required' });
+    }
     const result = await availabilityService.getSlots(turfId as string, date as string);
     sendSuccess(res, result, 'Slots retrieved');
   } catch (error) {
@@ -13,11 +16,23 @@ export const getSlots = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const holdSlot = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const holdSlot = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { turfId, date, startTime } = req.body;
-    const result = await availabilityService.holdSlot(turfId, date, startTime, req.user.id);
+    const { turfId, date, startTime, userId } = req.body;
+    const actorId = (req as any).user?.id || userId || 'guest-user';
+    const result = await availabilityService.holdSlot(turfId, date, startTime, actorId);
     sendSuccess(res, result, 'Slot held successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const releaseHold = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { turfId, date, startTime, userId } = req.body;
+    const actorId = (req as any).user?.id || userId;
+    const result = await availabilityService.releaseHold(turfId, date, startTime, actorId);
+    sendSuccess(res, result, 'Slot hold released');
   } catch (error) {
     next(error);
   }
@@ -26,7 +41,7 @@ export const holdSlot = async (req: AuthRequest, res: Response, next: NextFuncti
 export const blockSlot = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { turfId, date, startTime } = req.body;
-    const result = await availabilityService.blockSlot(turfId, date, startTime, req.user.id);
+    const result = await availabilityService.blockSlot(turfId, date, startTime);
     sendSuccess(res, result, 'Slot blocked successfully');
   } catch (error) {
     next(error);
@@ -36,7 +51,7 @@ export const blockSlot = async (req: AuthRequest, res: Response, next: NextFunct
 export const unblockSlot = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { turfId, date, startTime } = req.body;
-    const result = await availabilityService.unblockSlot(turfId, date, startTime, req.user.id);
+    const result = await availabilityService.unblockSlot(turfId, date, startTime);
     sendSuccess(res, result, 'Slot unblocked successfully');
   } catch (error) {
     next(error);
@@ -46,7 +61,7 @@ export const unblockSlot = async (req: AuthRequest, res: Response, next: NextFun
 export const setMaintenance = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { turfId, date, startTime } = req.body;
-    const result = await availabilityService.setMaintenance(turfId, date, startTime, req.user.id);
+    const result = await availabilityService.setMaintenance(turfId, date, startTime);
     sendSuccess(res, result, 'Slot set to maintenance');
   } catch (error) {
     next(error);
@@ -56,7 +71,7 @@ export const setMaintenance = async (req: AuthRequest, res: Response, next: Next
 export const clearMaintenance = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { turfId, date, startTime } = req.body;
-    const result = await availabilityService.clearMaintenance(turfId, date, startTime, req.user.id);
+    const result = await availabilityService.unblockSlot(turfId, date, startTime);
     sendSuccess(res, result, 'Slot maintenance cleared');
   } catch (error) {
     next(error);
