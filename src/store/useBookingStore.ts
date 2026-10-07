@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Booking, BookingStatus } from '@/types';
-import champions from '@/assets/turf-champions.jpg';
-import skyline from '@/assets/turf-skyline.jpg';
-import greenfield from '@/assets/turf-greenfield.jpg';
+import champions from '@/assets/turf-champions.webp';
+import skyline from '@/assets/turf-skyline.webp';
+import greenfield from '@/assets/turf-greenfield.webp';
 
 interface BookingState {
   bookings: Booking[];

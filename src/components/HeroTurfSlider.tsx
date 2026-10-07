@@ -1,11 +1,11 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import aiFootballTurf from '@/assets/ai-football-turf.jpg';
-import aiCricketTurf from '@/assets/ai-cricket-turf.jpg';
-import aiBadmintonTurf from '@/assets/ai-badminton-turf.jpg';
-import aiBasketballTurf from '@/assets/ai-basketball-turf.jpg';
-import aiRooftopTurf from '@/assets/ai-rooftop-turf.jpg';
+import aiFootballTurf from '@/assets/ai-football-turf.webp';
+import aiCricketTurf from '@/assets/ai-cricket-turf.webp';
+import aiBadmintonTurf from '@/assets/ai-badminton-turf.webp';
+import aiBasketballTurf from '@/assets/ai-basketball-turf.webp';
+import aiRooftopTurf from '@/assets/ai-rooftop-turf.webp';
 
 const slides = [
   { id: 'football', image: aiFootballTurf, alt: 'Football Turf' },

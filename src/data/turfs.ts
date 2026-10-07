@@ -1,11 +1,11 @@
-import champions from '@/assets/turf-champions.jpg';
-import skyline from '@/assets/turf-skyline.jpg';
-import greenfield from '@/assets/turf-greenfield.jpg';
-import aiFootball from '@/assets/ai-football-turf.jpg';
-import aiCricket from '@/assets/ai-cricket-turf.jpg';
-import aiBadminton from '@/assets/ai-badminton-turf.jpg';
-import aiBasketball from '@/assets/ai-basketball-turf.jpg';
-import aiRooftop from '@/assets/ai-rooftop-turf.jpg';
+import champions from '@/assets/turf-champions.webp';
+import skyline from '@/assets/turf-skyline.webp';
+import greenfield from '@/assets/turf-greenfield.webp';
+import aiFootball from '@/assets/ai-football-turf.webp';
+import aiCricket from '@/assets/ai-cricket-turf.webp';
+import aiBadminton from '@/assets/ai-badminton-turf.webp';
+import aiBasketball from '@/assets/ai-basketball-turf.webp';
+import aiRooftop from '@/assets/ai-rooftop-turf.webp';
 import { gamingZones } from './gamingZones';
 import type { 
   Turf, 

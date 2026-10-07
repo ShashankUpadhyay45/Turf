@@ -1,9 +1,9 @@
 import type { Turf } from '@/types';
-import champions from '@/assets/turf-champions.jpg';
-import skyline from '@/assets/turf-skyline.jpg';
-import greenfield from '@/assets/turf-greenfield.jpg';
-import aiBasketball from '@/assets/ai-basketball-turf.jpg';
-import aiRooftop from '@/assets/ai-rooftop-turf.jpg';
+import champions from '@/assets/turf-champions.webp';
+import skyline from '@/assets/turf-skyline.webp';
+import greenfield from '@/assets/turf-greenfield.webp';
+import aiBasketball from '@/assets/ai-basketball-turf.webp';
+import aiRooftop from '@/assets/ai-rooftop-turf.webp';
 
 // ============================================================================
 // GAMING & ENTERTAINMENT MULTI-ACTIVITY ZONES (FRONTEND DEMO DATA)
